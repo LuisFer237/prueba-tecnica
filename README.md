@@ -5,6 +5,10 @@
 - **Backend:** Node.js, Express, Sequelize, PostgreSQL, JWT
 - **Frontend:** Next.js, React, Tailwind CSS, shadcn/ui, React Toastify, Lucide Icons
 
+# Nota
+
+- Los .env ya se encuentran en el repositorio para practicidad
+
 ---
 
 ## Backend
