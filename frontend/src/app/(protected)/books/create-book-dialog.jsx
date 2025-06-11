@@ -32,11 +32,13 @@ export function BookDialog({
   isEdit = false,
   hideTrigger = false,
 }) {
+
   const [datePickerOpen, setDatePickerOpen] = React.useState(false);
   const [date, setDate] = React.useState(
     form.release_date ? new Date(form.release_date) : undefined
   );
 
+  // Actualiza la fecha cuando el formulario cambia
   React.useEffect(() => {
     if (
       form.release_date &&
@@ -46,6 +48,7 @@ export function BookDialog({
     }
   }, [form.release_date]);
 
+  // Maneja el cambio de fecha desde el calendario
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate);
     setDatePickerOpen(false);
@@ -107,7 +110,10 @@ export function BookDialog({
             />
           </div>
           <div>
-            <Label htmlFor="release_date" className="block text-sm font-medium mb-1">
+            <Label
+              htmlFor="release_date"
+              className="block text-sm font-medium mb-1"
+            >
               Fecha de publicación
             </Label>
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
@@ -122,7 +128,10 @@ export function BookDialog({
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="start"
+              >
                 <Calendar
                   mode="single"
                   selected={date}
@@ -139,7 +148,13 @@ export function BookDialog({
               </Button>
             </DialogClose>
             <Button type="submit" disabled={loading}>
-              {loading ? (isEdit ? "Guardando..." : "Agregando...") : isEdit ? "Guardar" : "Agregar"}
+              {loading
+                ? isEdit
+                  ? "Guardando..."
+                  : "Agregando..."
+                : isEdit
+                ? "Guardar"
+                : "Agregar"}
             </Button>
           </DialogFooter>
         </form>

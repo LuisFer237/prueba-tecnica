@@ -8,6 +8,7 @@ import { getAllBooks } from "../../../api/book";
 export default function BooksPage() {
   const [data, setData] = useState([]);
 
+  // Función para obtener los datos de los libros
   const fetchData = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");

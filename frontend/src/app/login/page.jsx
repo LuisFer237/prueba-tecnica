@@ -3,7 +3,7 @@
 import React from "react";
 
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, AlertCircle, BookOpen } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, AlertCircle, BookOpen, BookOpenText } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { login } from "../../api/auth";
@@ -28,11 +28,32 @@ export default function Home() {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerError, setRegisterError] = useState("");
 
+  // Determinar filas y columnas según el ancho de la pantalla
+  const [showGrid, setShowGrid] = useState(true);
+  const [grid, setGrid] = useState({ rows: 8, cols: 10 });
+  React.useEffect(() => {
+    function updateGrid() {
+      if (window.innerWidth < 500) {
+        setShowGrid(false);
+      } else if (window.innerWidth < 768) {
+        setShowGrid(true);
+        setGrid({ rows: 5, cols: 6 });
+      } else {
+        setShowGrid(true);
+        setGrid({ rows: 8, cols: 10 });
+      }
+    }
+    updateGrid();
+    window.addEventListener("resize", updateGrid);
+    return () => window.removeEventListener("resize", updateGrid);
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     try {
+      // Llamar a la API de inicio de sesión, almacenando el token en localStorage
       const data = await login({ email, password });
       localStorage.setItem("token", data.token);
       router.push("/dashboard");
@@ -43,10 +64,12 @@ export default function Home() {
     }
   };
 
+  // Manejar cambios en el formulario de registro
   const handleRegisterChange = (e) => {
     setRegisterForm({ ...registerForm, [e.target.name]: e.target.value });
   };
 
+  // Manejar el envío del formulario de registro
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setRegisterLoading(true);
@@ -54,6 +77,7 @@ export default function Home() {
     try {
       const result = await registerUser(registerForm);
       if (result === true || (result && !result.error)) {
+        // Cerrar el dialog de registro y limpiar el formulario
         setRegisterOpen(false);
         setRegisterForm({ email: "", name: "", password: "" });
         setError("");
@@ -68,7 +92,7 @@ export default function Home() {
           localStorage.setItem("token", data.token);
           router.push("/dashboard");
         } catch (err) {
-          setError("Usuario registrado, pero error al iniciar sesión automático");
+          setError("Error al iniciar sesión tras registro: ");
         }
       } else if (result && result.error) {
         if (result.error === "El correo ya está registrado") {
@@ -85,16 +109,39 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#90f2ba] flex items-center justify-center p-4 relative overflow-hidden">
+      {showGrid && (
+        <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+          {/* Grid de iconos BookOpen */}
+          {[...Array(grid.rows)].map((_, row) =>
+            [...Array(grid.cols)].map((_, col) => (
+              <BookOpenText
+                key={`bookopen-${row}-${col}`}
+                className="absolute text-white opacity-90"
+                style={{
+                  top: `${row * (100 / grid.rows)}%`,
+                  left: `${col * (100 / grid.cols)}%`,
+                  width: "48px",
+                  height: "48px",
+                  transform: `rotate(${(row + col) % 2 === 0 ? 0 : 15}deg)`,
+                }}
+              />
+            ))
+          )}
+        </div>
+      )}
+      
+      <div className="w-full max-w-md z-10">
         <div className="w-full bg-white shadow-lg border border-emerald-200 rounded-lg overflow-hidden">
           {/* Header */}
           <div className="bg-emerald-100 px-6 py-4 space-y-1 rounded-t-lg flex justify-center items-center flex-col ">
             <div className="flex items-center justify-center mb-2 bg-white rounded-full size-20">
               <BookOpen className="h-12 w-12 text-emerald-700" />
             </div>
-
             <h2 className="text-2xl font-bold text-center text-emerald-900">
+              Bienvenido
+            </h2>
+            <h2 className="text-2xl font-semibold text-center text-emerald-900">
               Inicio de sesión
             </h2>
           </div>
@@ -133,7 +180,7 @@ export default function Home() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder="example@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-3 py-2 border border-emerald-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"

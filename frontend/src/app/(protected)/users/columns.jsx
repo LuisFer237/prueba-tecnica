@@ -21,8 +21,8 @@ import {
   DialogDescription,
   DialogClose,
 } from "../../../components/ui/dialog";
-import { UserDialog } from "./create-user-dialog";
 
+// Objeto de columnas para la tabla de usuarios
 export const columns = [
   {
     accessorKey: "id",
@@ -65,7 +65,7 @@ export const columns = [
       const user = row.original;
       const [open, setOpen] = React.useState(false);
       const [loading, setLoading] = React.useState(false);
-      // Para edición
+
       const handleEdit = () => {
         if (table && table.options.meta && table.options.meta.onEditUser) {
           table.options.meta.onEditUser(user);
@@ -76,6 +76,18 @@ export const columns = [
         const token = localStorage.getItem("token");
         if (!token) {
           toast.error("No autenticado");
+          return;
+        }
+        // Detecta si el usuario a borrar es el logeado
+        let currentUserId = null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          currentUserId = payload.id;
+        } catch (e) {
+          currentUserId = null;
+        }
+        if (user.id === currentUserId) {
+          toast.error("No puedes eliminar tu propio usuario mientras estás logeado.");
           return;
         }
         setLoading(true);
@@ -89,8 +101,10 @@ export const columns = [
             window.location.reload();
           }
         } catch (err) {
-          if (err.message === 'USER_HAS_BOOKS') {
-            toast.error("No se puede eliminar el usuario porque tiene libros asociados.");
+          if (err.message === "USER_HAS_BOOKS") {
+            toast.error(
+              "No se puede eliminar el usuario porque tiene libros asociados."
+            );
           } else {
             toast.error("Error al eliminar usuario");
           }

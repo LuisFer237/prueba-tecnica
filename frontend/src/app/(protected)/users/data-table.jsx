@@ -17,24 +17,35 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/ui/table";
-import { CreateUserDialog, UserDialog } from "./create-user-dialog";
+import { UserDialog } from "./create-user-dialog";
 import { registerUser } from "../../../api/auth";
 import { updateUserById } from "../../../api/user";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import { Users as UsersIcon } from "lucide-react";
 
 export function DataTable({ columns, data, meta }) {
   const [tableData, setTableData] = React.useState(data);
   const [open, setOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
   const [form, setForm] = React.useState({ email: "", name: "", password: "" });
-  const [editForm, setEditForm] = React.useState({ id: null, email: "", name: "", password: "" });
+  const [editForm, setEditForm] = React.useState({
+    id: null,
+    email: "",
+    name: "",
+    password: "",
+  });
   const [loading, setLoading] = React.useState(false);
   const [editLoading, setEditLoading] = React.useState(false);
   const [loadingData, setLoadingData] = React.useState(false);
 
-  // Editar usuario
+  // Maneja el clic en el botón de editar
   const handleEditClick = (user) => {
-    setEditForm({ id: user.id, email: user.email, name: user.name, password: "" });
+    setEditForm({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      password: "",
+    });
     setEditOpen(true);
   };
 
@@ -60,7 +71,7 @@ export function DataTable({ columns, data, meta }) {
 
     try {
       if (!form.name || !form.email || !form.password) {
-        alert("Por favor, completa todos los campos.");
+        toast.error("Completa todos los campos.");
         setLoading(false);
         return;
       }
@@ -68,27 +79,27 @@ export function DataTable({ columns, data, meta }) {
       const result = await registerUser(form);
       if (result === true) {
         setForm({ email: "", name: "", password: "" });
-        setOpen(false); 
-        toast('Usuario creado exitosamente', { type: 'success' });
+        setOpen(false);
+        toast("Usuario creado exitosamente", { type: "success" });
 
         // Actualizar la tabla de usuarios después de agregar uno nuevo
         if (typeof window !== "undefined") {
           const token = localStorage.getItem("token");
-          if (token) {    
+          if (token) {
             const { getAllUsers } = await import("../../../api/user");
             const users = await getAllUsers(token);
             setTableData([...users].reverse());
           }
         }
-      } else if (result && result.error === 'El correo ya está registrado') {
-        toast('El correo ya está registrado', { type: 'error' });
+      } else if (result && result.error === "El correo ya está registrado") {
+        toast("El correo ya está registrado", { type: "error" });
       }
     } catch (error) {
-      if (error?.response?.data?.error === 'El correo ya está registrado') {
-        toast('El correo ya está registrado', { type: 'error' });
+      if (error?.response?.data?.error === "El correo ya está registrado") {
+        toast("El correo ya está registrado", { type: "error" });
       } else {
         console.error("Error al registrar el usuario:", error);
-        toast('Error al registrar el usuario', { type: 'error' });
+        toast("Error al registrar el usuario", { type: "error" });
       }
     }
 
@@ -117,10 +128,10 @@ export function DataTable({ columns, data, meta }) {
       toast.success("Usuario actualizado correctamente");
       if (meta && meta.refetch) meta.refetch();
     } catch (err) {
-      if (err.message === 'EMAIL_EXISTS') {
-        toast.error('El correo ya está registrado');
+      if (err.message === "EMAIL_EXISTS") {
+        toast.error("El correo ya está registrado");
       } else {
-        toast.error('Error al actualizar usuario');
+        toast.error("Error al actualizar usuario");
       }
     } finally {
       setEditLoading(false);
@@ -137,6 +148,19 @@ export function DataTable({ columns, data, meta }) {
   React.useEffect(() => {
     setTableData([...data].reverse());
   }, [data]);
+
+  // Obtener el ID del usuario actual desde el token
+  const currentToken =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  let currentUserId = null;
+  if (currentToken) {
+    try {
+      const payload = JSON.parse(atob(currentToken.split(".")[1]));
+      currentUserId = payload.id;
+    } catch (e) {
+      currentUserId = null;
+    }
+  }
 
   return (
     <div className="w-full">
@@ -186,10 +210,15 @@ export function DataTable({ columns, data, meta }) {
           <TableBody>
             {loadingData ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-48 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-48 text-center"
+                >
                   <div className="w-full flex justify-center items-center py-16">
                     <span className="animate-spin rounded-full border-4 border-emerald-600 border-t-transparent h-10 w-10 inline-block mr-3"></span>
-                    <span className="text-emerald-600 font-medium text-lg">Cargando usuarios...</span>
+                    <span className="text-emerald-600 font-medium text-lg">
+                      Cargando usuarios...
+                    </span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -213,9 +242,21 @@ export function DataTable({ columns, data, meta }) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-32 text-center"
                 >
-                  No se encontraron usuarios.
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="rounded-full bg-muted p-4 mb-4">
+                      <UsersIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No hay usuarios
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-sm">
+                      No se encontraron usuarios en el sistema.
+                      <br />
+                      Los usuarios aparecerán aquí una vez que sean agregados.
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : null}

@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import { Badge } from "../../../components/ui/badge";
 import { deleteBookById } from "../../../api/book";
 import { toast } from "react-toastify";
 import {
@@ -22,6 +21,8 @@ import {
   DialogClose,
 } from "../../../components/ui/dialog";
 
+
+// Objeto de columnas para la tabla de libros
 export const columns = [
   {
     accessorKey: "id",

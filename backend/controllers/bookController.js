@@ -69,6 +69,8 @@ exports.updateBook = async (req, res) => {
     if (!book) {
       return res.status(404).json({ error: 'Libro no encontrado' });
     }
+
+    // Validar que no haya otro libro con el mismo ISBN
     const existingBook = await Book.findOne({ where: { isbn } });
     if (existingBook && existingBook.id !== book.id) {
       return res.status(400).json({ error: 'Ya existe un libro con el mismo ISBN' });
@@ -78,6 +80,7 @@ exports.updateBook = async (req, res) => {
     if (author) book.author = author;
     if (isbn) book.isbn = isbn;
     if (release_date) book.release_date = release_date;
+
     await book.save();
     return res.json({ message: 'Libro actualizado correctamente' });
   } catch (error) {

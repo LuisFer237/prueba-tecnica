@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Book = require('../models/Book');
 const jwt = require('jsonwebtoken');
 
+
+// Controlador para obtener todos los usuarios
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.findAll();
@@ -20,6 +22,7 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+// Controlador para obtener un usuario por ID
 exports.getUserById = async (req, res) => {
 
   const { id } = req.params;
@@ -39,6 +42,7 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+// Controlador para eliminar un usuario por ID
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
 
@@ -61,6 +65,7 @@ exports.deleteUser = async (req, res) => {
   }
 }
 
+// Controlador para actualizar un usuario por ID
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
   const { email, name, password } = req.body;

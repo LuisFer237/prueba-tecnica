@@ -8,6 +8,7 @@ import { getAllUsers } from "../../../api/user";
 export default function UsersPage() {
   const [data, setData] = useState([]);
 
+  // Función para obtener los datos de los usuarios
   const fetchData = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");

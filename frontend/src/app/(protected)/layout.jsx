@@ -32,6 +32,7 @@ export default function ProtectedLayout({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Verificar si el usuario está autenticado y obtener su información
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -45,7 +46,7 @@ export default function ProtectedLayout({ children }) {
         setUser(data);
         timeoutId = setTimeout(() => setLoading(false), 1000);
       })
-      .catch(() => router.push("/login"));
+      .catch(() => router.push("/login"));  
     return () => clearTimeout(timeoutId);
   }, [router]);
 

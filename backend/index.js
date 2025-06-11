@@ -2,11 +2,13 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+// Importar las rutas
 const sequelize = require('./db');
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
 const authRoutes = require('./routes/authRoutes');
 
+// Conectar a la base de datos
 sequelize.authenticate()
   .then(() => console.log('Conexión a la base de datos exitosa'))
   .catch(err => console.error('Error al conectar a la base de datos:', err));

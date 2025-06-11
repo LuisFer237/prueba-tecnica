@@ -3,11 +3,9 @@
 import { useRouter } from "next/navigation";
 import { Book, Users } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import { useUser } from "../layout.jsx";
 
 export default function Dashboard() {
   const router = useRouter();
-  const user = useUser();
 
   const handleBooks = () => {
     router.push("/books");
