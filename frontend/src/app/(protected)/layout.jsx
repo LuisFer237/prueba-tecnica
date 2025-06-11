@@ -31,23 +31,36 @@ export default function ProtectedLayout({ children }) {
   const pathname = usePathname();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasToken, setHasToken] = useState(true);
 
   // Verificar si el usuario está autenticado y obtener su información
   useEffect(() => {
+    let isMounted = true;
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      setHasToken(false);
+      router.replace("/login");
       return;
     }
-
+    setHasToken(true);
     let timeoutId;
     getUserInfo(token)
       .then((data) => {
+        if (!isMounted) return;
         setUser(data);
-        timeoutId = setTimeout(() => setLoading(false), 1000);
+        timeoutId = setTimeout(() => {
+          if (isMounted) setLoading(false);
+        }, 1000);
       })
-      .catch(() => router.push("/login"));  
-    return () => clearTimeout(timeoutId);
+      .catch(() => {
+        if (!isMounted) return;
+        setHasToken(false);
+        router.replace("/login");
+      });  
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [router]);
 
   const handleLogout = () => {
@@ -66,7 +79,10 @@ export default function ProtectedLayout({ children }) {
     pageDescription = "Gestiona los usuarios";
   }
 
-  if (loading || !user) {
+  if (!hasToken) {
+    return null;
+  }
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-emerald-50">
         <div className="flex flex-col items-center gap-6">
